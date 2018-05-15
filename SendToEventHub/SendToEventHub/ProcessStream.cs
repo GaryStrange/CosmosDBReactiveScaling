@@ -9,12 +9,12 @@ namespace SendToEventHub
     public static class ProcessStream
     {
         [FunctionName("ProcessStream")]
-        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "ProcessStream/name/{name}")]HttpRequestMessage req, string name, TraceWriter log)
+        public static HttpResponseMessage Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
 
             // Fetching the name from the path parameter in the request URL
-            return req.CreateResponse(HttpStatusCode.OK, "Hello " + name);
+            return req.CreateResponse(HttpStatusCode.OK, "Hello ");
         }
     }
 }
