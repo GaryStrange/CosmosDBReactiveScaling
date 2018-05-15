@@ -8,6 +8,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.EventHubs;
 using System.Text;
 using System;
+using Newtonsoft.Json;
 
 namespace SendToEventHub
 {
@@ -29,14 +30,14 @@ namespace SendToEventHub
 
             // Get request body
             dynamic data = await req.Content.ReadAsAsync<object>();
-
+            string jsonString = JsonConvert.SerializeObject(data);
             // Set name to query string or body data
             name = name ?? data?.name;
 
             InitialiseClient();
             log.Info("Event Hub client initialized.");
 
-            await SendMessagesToEventHub(5, log);
+            await SendMessagesToEventHub(jsonString, 500, log);
 
             await eventHubClient.CloseAsync();
             log.Info("Event Hub client closed.");
@@ -49,22 +50,22 @@ namespace SendToEventHub
         }
 
         // Creates an event hub client and sends 100 messages to the event hub.
-        private static async Task SendMessagesToEventHub(int numMessagesToSend, TraceWriter log)
+        private static async Task SendMessagesToEventHub(string data, int numMessagesToSend, TraceWriter log)
         {
             for (var i = 0; i < numMessagesToSend; i++)
             {
                 try
                 {
                     var message = $"Message {i}";
-                    log.Info($"Sending message: {message}");
-                    await eventHubClient.SendAsync(new EventData(Encoding.UTF8.GetBytes(message)));
+                    log.Info($"Sending message: {data}");
+                    await eventHubClient.SendAsync(new EventData(Encoding.UTF8.GetBytes(data)));
                 }
                 catch (Exception exception)
                 {
                     log.Error($"{DateTime.Now} > Exception: {exception.Message}");
                 }
 
-                await Task.Delay(10);
+                await Task.Delay(100);
             }
 
             log.Info($"{numMessagesToSend} messages sent.");
